@@ -4,7 +4,7 @@
 
 ```
 RISK ASSESSMENT: [System Name] - [Vulnerability short name / CVE]
-Date: [date]    Prepared by: [name/team]    Approving authority: [per tiering table]
+Date: [date]    Prepared by: [name/team]    Approving authority: [name/role]
 
 1. AIM
 To seek approval from [approver] for [extension of remediation timeline / risk
@@ -22,9 +22,8 @@ extension [Y] months.]
     threat intel] on [date]. Original remediation deadline: [date].
 
 3. JUSTIFICATION
-3.1 [Constraint category]: [specific reason with evidence].
-3.2 Committed remediation plan: [action] by [requested deadline], owned by [team].
-3.3 Review trigger: re-assess immediately upon [public PoC/exploit release /
+3.1 [Constraint category]: [specific reason with evidence]. Committed remediation plan: [action] by [requested deadline], owned by [team].
+3.2 Review trigger: re-assess immediately upon [public PoC/exploit release /
     observed exploitation in the wild / change in system exposure].
 
 4. IMPACT, RISK ASSESSMENT AND MITIGATION

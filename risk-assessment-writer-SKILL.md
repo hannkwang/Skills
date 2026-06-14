@@ -13,10 +13,10 @@ This skill has two modes:
 
 ## Core principles
 
-1. **BLUF.** The Aim states the decision being requested in one or two sentences. No throat-clearing.
-2. **Traceability.** Every residual risk rating must be explainable as: Original Risk -> specific mitigations -> Residual Risk. If a rating drops, the mitigations listed must mechanically explain why (reduced likelihood, reduced impact, or both).
-3. **Specificity over reassurance.** "We will monitor closely" is not a mitigation. A mitigation names a control, who operates it, and what it actually blocks or detects. Select controls from `references/mitigations-catalog.md` (see column 7 guidance).
-4. **Honest justification.** The justification explains a real constraint (vendor dependency, regression risk, change freeze, resourcing), not a preference.
+1. **BLUF.** The Aim states the decision requested in one or two sentences. No throat-clearing.
+2. **Traceability.** Every residual rating must read as Original Risk -> specific mitigations -> Residual Risk; a drop must be mechanically explained by reduced likelihood, impact, or both.
+3. **Specificity over reassurance.** A mitigation names a control, who operates it, and what it blocks or detects - "we will monitor closely" is not one.
+4. **Honest justification.** State a real constraint (vendor dependency, regression risk, change freeze, resourcing), not a preference.
 
 ## Required inputs
 
@@ -30,7 +30,7 @@ Collect these before drafting. Ask in ONE consolidated message for anything miss
 | **Original remediation deadline** (user-supplied) | Baseline for the ask |
 | **Requested new deadline** (user-supplied) | Defines extension duration |
 | Mitigations in place or planned (with dates) | Column 7 |
-| Committed remediation plan and owner | Justification 3.2 |
+| Committed remediation plan and owner | Justification 3.1 |
 
 **Extension sanity check**: compute the extension duration (new deadline minus original deadline) and state it explicitly in the Aim. Apply these flags in the draft so the approver sees them without asking:
 
@@ -57,36 +57,20 @@ A full template with two worked examples (web-app CVE and OS/infra patching) is 
 
 ### 1. Aim
 
-One or two sentences. State:
+State in 1 line:
 - What approval is sought (extension of remediation timeline / risk acceptance)
 - The residual risk level to be carried (High / Medium / Low)
 - Original deadline, requested deadline, and the resulting extension duration
-- The approving authority per the tiering table below
 
 Example: "To seek approval from [approver] for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
 
-**Approver tiering** (confirm against the organisation's governance; defaults below are placeholders to be replaced):
-
-| Residual risk | Approving authority |
-|---|---|
-| High | [TBC - e.g., CISO / risk committee] |
-| Medium | [TBC - e.g., Director of system-owning division] |
-| Low | [TBC - e.g., System owner] |
-
-If the residual risk level and the named approver in the user's draft do not match this table, flag it.
-
 ### 2. Background
 
-Cover, in order:
-- **System**: name, function, classification/criticality, exposure, user base
-- **Vulnerability**: CVE ID and CVSS score where available; plain-language description of what it allows an attacker to do on THIS system. If no CVE (e.g., logic flaw from VAPT), describe the weakness class (e.g., IDOR, broken access control)
-- **Source and dates**: how it was found, date reported, original remediation deadline
-
-If multiple vulnerabilities are covered, list each with its own CVE/source. Do not bundle unrelated risks into one paper unless they share the same system and remediation constraint.
+One line each: **System** (name, function, classification, exposure, users); **Vulnerability** (CVE+CVSS, or weakness class if no CVE, plus what it enables on THIS system); **Source/dates** (how found, date reported, original deadline). Multiple vulns: one line per CVE/source; don't bundle unrelated risks.
 
 ### 3. Justification
 
-Answer one question: why can the team not fix this within the original timeline? Acceptable categories:
+One line: why can't the team fix this within the original timeline? Pick a category below, cite the evidence (vendor advisory, test results, freeze memo), and state the committed remediation date + owner. "Team is busy" without sequencing context is not a justification.
 
 | Category | Example |
 |---|---|
@@ -96,9 +80,7 @@ Answer one question: why can the team not fix this within the original timeline?
 | Architectural work | Fix requires redesign (e.g., auth rework), not a patch |
 | Resource/sequencing | Same team remediating a higher-severity finding first |
 
-For each, state the evidence (vendor advisory link, test results, freeze memo) and the committed remediation date with owner. "Team is busy" without sequencing context is not a justification.
-
-Always include a **review trigger** clause: conditions forcing immediate re-assessment regardless of the approved deadline (e.g., public PoC/exploit release, observed exploitation in the wild, change in system exposure).
+Always include a **review trigger**: conditions forcing immediate re-assessment regardless of the approved deadline (public PoC/exploit release, observed exploitation, change in exposure).
 
 ### 4. Impact, Risk Assessment and Mitigation
 
@@ -112,7 +94,7 @@ Present as a table with EXACTLY these 10 columns:
 | 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
 | 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
 | 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., PDPA breach reporting) |
-| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `references/mitigations-catalog.md` by control ID. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
+| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `references/mitigations-catalog.md` by control ID (load that file when filling this column, not before). Any likelihood/impact drop in cols 8-9 must use a control the catalog's "Reduces" column lists for that axis. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
 | 8 | Residual Likelihood | Post-mitigation 5-level rating + which control ID(s) caused the change |
 | 9 | Residual Impact | Post-mitigation 5-level rating + which control ID(s) caused the change |
 | 10 | Residual Risk | High/Medium/Low derived from the same 5x5 matrix |
@@ -155,21 +137,13 @@ Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from
 
 If the user's organisation supplies a different matrix or anchors, use theirs and note the substitution.
 
-## Mitigation quality bar
-
-Each measure in column 7 must pass three tests:
-
-1. Names a concrete control, selected by ID from `references/mitigations-catalog.md` (load that file when filling column 7, not before)
-2. States whether it is already in place or planned (with date)
-3. Maps to the rating change consistently with the catalog's "Reduces" column: a likelihood drop needs a control catalogued as reducing Likelihood for that vulnerability class; an impact drop needs a control catalogued as reducing Impact
-
 ## Review mode
 
 When the user provides an existing paper to critique, do not rewrite it wholesale. Output a checklist table, then suggested rewrites only for failed items.
 
 | Check | Pass criteria |
 |---|---|
-| RA-01 Aim is BLUF | Decision, residual risk level, both deadlines, extension duration, correct approver tier - all in <=2 sentences |
+| RA-01 Aim is BLUF | Decision, residual risk level, both deadlines, extension duration - all in <=2 sentences |
 | RA-02 Background completeness | System exposure/classification, CVE+CVSS (or weakness class), source, dates all present |
 | RA-03 Justification validity | Falls in an acceptable category with evidence and committed date + owner |
 | RA-04 Review trigger present | Re-assessment conditions stated |
