@@ -1,0 +1,197 @@
+---
+name: risk-assessment-writer
+description: Draft, write, structure, or review risk assessment papers, risk acceptance requests, and remediation timeline extension requests for security vulnerabilities. Use this skill whenever the user wants to produce or critique such a document - including requests to "write up", "draft a paper for", "review this risk acceptance", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding. Do not use for general CVE analysis or triage that does not involve producing or reviewing a risk paper.
+---
+
+# Risk Assessment Writer
+
+Help engineers write decision-ready risk assessment papers requesting an extension of a vulnerability remediation timeline (or formal risk acceptance). The reader is an approving authority (CISO / risk owner) who needs to decide in minutes, not reverse-engineer the engineer's thinking.
+
+This skill has two modes:
+- **Draft mode** (default): produce a complete paper from user inputs
+- **Review mode**: the user provides an existing paper; output a pass/fail checklist with suggested rewrites (see "Review mode" below)
+
+## Core principles
+
+1. **BLUF.** The Aim states the decision being requested in one or two sentences. No throat-clearing.
+2. **Traceability.** Every residual risk rating must be explainable as: Original Risk -> specific mitigations -> Residual Risk. If a rating drops, the mitigations listed must mechanically explain why (reduced likelihood, reduced impact, or both).
+3. **Specificity over reassurance.** "We will monitor closely" is not a mitigation. A mitigation names a control, who operates it, and what it actually blocks or detects. Select controls from `references/mitigations-catalog.md` (see column 7 guidance).
+4. **Honest justification.** The justification explains a real constraint (vendor dependency, regression risk, change freeze, resourcing), not a preference.
+
+## Required inputs
+
+Collect these before drafting. Ask in ONE consolidated message for anything missing; mark unknowns `[TBC]` and list all TBCs at the end of the draft.
+
+| Input | Why needed |
+|---|---|
+| System name, function, classification/criticality, exposure (internet-facing / intranet / air-gapped), user base | Drives Impact anchoring |
+| Vulnerability: CVE + CVSS (or weakness class if no CVE) | Column 2 |
+| Discovery source (VAPT / VMS / bug bounty / vendor advisory / threat intel) and date reported | Background 2.3 |
+| **Original remediation deadline** (user-supplied) | Baseline for the ask |
+| **Requested new deadline** (user-supplied) | Defines extension duration |
+| Mitigations in place or planned (with dates) | Column 7 |
+| Committed remediation plan and owner | Justification 3.2 |
+
+**Extension sanity check**: compute the extension duration (new deadline minus original deadline) and state it explicitly in the Aim. Apply these flags in the draft so the approver sees them without asking:
+
+| Condition | Action |
+|---|---|
+| Residual risk High and extension > 1 month | Add a highlighted note: extended carriage of High residual risk; recommend interim re-review at the 1-month mark |
+| Any second or subsequent extension for the same finding | State the extension history (count + cumulative duration) in the Aim |
+| Extension > 6 months | Recommend converting to formal risk acceptance with scheduled re-assessment instead of a timeline extension |
+
+## Document structure
+
+ALWAYS use this exact four-section structure:
+
+```
+1. Aim
+2. Background
+3. Justification
+4. Impact, Risk Assessment and Mitigation
+```
+
+A full template with two worked examples (web-app CVE and OS/infra patching) is in `references/template.md` - read it before drafting a complete paper.
+
+## Section guidance
+
+### 1. Aim
+
+One or two sentences. State:
+- What approval is sought (extension of remediation timeline / risk acceptance)
+- The residual risk level to be carried (High / Medium / Low)
+- Original deadline, requested deadline, and the resulting extension duration
+- The approving authority per the tiering table below
+
+Example: "To seek approval from [approver] for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
+
+**Approver tiering** (confirm against the organisation's governance; defaults below are placeholders to be replaced):
+
+| Residual risk | Approving authority |
+|---|---|
+| High | [TBC - e.g., CISO / risk committee] |
+| Medium | [TBC - e.g., Director of system-owning division] |
+| Low | [TBC - e.g., System owner] |
+
+If the residual risk level and the named approver in the user's draft do not match this table, flag it.
+
+### 2. Background
+
+Cover, in order:
+- **System**: name, function, classification/criticality, exposure, user base
+- **Vulnerability**: CVE ID and CVSS score where available; plain-language description of what it allows an attacker to do on THIS system. If no CVE (e.g., logic flaw from VAPT), describe the weakness class (e.g., IDOR, broken access control)
+- **Source and dates**: how it was found, date reported, original remediation deadline
+
+If multiple vulnerabilities are covered, list each with its own CVE/source. Do not bundle unrelated risks into one paper unless they share the same system and remediation constraint.
+
+### 3. Justification
+
+Answer one question: why can the team not fix this within the original timeline? Acceptable categories:
+
+| Category | Example |
+|---|---|
+| Vendor dependency | Patch not yet released; fix scheduled in vendor's next release |
+| Regression/operational risk | Patch breaks a critical integration; requires full regression cycle |
+| Change constraints | Production freeze, audit period, peak operational period |
+| Architectural work | Fix requires redesign (e.g., auth rework), not a patch |
+| Resource/sequencing | Same team remediating a higher-severity finding first |
+
+For each, state the evidence (vendor advisory link, test results, freeze memo) and the committed remediation date with owner. "Team is busy" without sequencing context is not a justification.
+
+Always include a **review trigger** clause: conditions forcing immediate re-assessment regardless of the approved deadline (e.g., public PoC/exploit release, observed exploitation in the wild, change in system exposure).
+
+### 4. Impact, Risk Assessment and Mitigation
+
+Present as a table with EXACTLY these 10 columns:
+
+| # | Column | What goes in it |
+|---|---|---|
+| 1 | No | Row number |
+| 2 | Vulnerability Assessment | Short description + CVE; what exploitation looks like on THIS system |
+| 3 | Likelihood | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
+| 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
+| 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
+| 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., PDPA breach reporting) |
+| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `references/mitigations-catalog.md` by control ID. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
+| 8 | Residual Likelihood | Post-mitigation 5-level rating + which control ID(s) caused the change |
+| 9 | Residual Impact | Post-mitigation 5-level rating + which control ID(s) caused the change |
+| 10 | Residual Risk | High/Medium/Low derived from the same 5x5 matrix |
+
+**Multi-vulnerability papers**: give each vulnerability its own row. Where mitigations are shared across rows, list the full mitigation once (first row where it applies) and reference it by control ID in subsequent rows (e.g., "NW-01 as per row 1"). Never restate full mitigation text across rows.
+
+## Risk matrix (5x5 likelihood x impact -> High/Medium/Low risk)
+
+### Likelihood anchors (pre- or post-mitigation, same scale)
+
+| Level | Anchor |
+|---|---|
+| Almost Certain | Exploitation expected: internet-facing, no auth required, weaponised exploit in active use in the wild |
+| Likely | Public exploit/PoC available AND system reachable by the relevant threat actor; low attacker prerequisites |
+| Possible | Exploit technique documented but requires meaningful prerequisites (auth, specific config, chaining) OR exposure is limited (intranet only) |
+| Unlikely | No public exploit; high prerequisites (local access, privileged account); or strong compensating control directly blocks the vector |
+| Rare | Exploitation requires insider access or physical access, or the vulnerable code path is unreachable in deployed configuration |
+
+### Impact anchors
+
+| Level | Anchor |
+|---|---|
+| Severe | Bulk loss/exposure of sensitive or RESTRICTED-classified data; sustained outage of a critical service; statutory breach-notification obligations near-certain |
+| Major | Significant personal data exposure or material service degradation affecting external users; likely regulatory reporting |
+| Moderate | Limited data exposure (small scope or low sensitivity) or internal service disruption; contained blast radius |
+| Minor | Negligible data sensitivity; brief degradation; no external user impact |
+| Insignificant | No meaningful confidentiality/integrity/availability consequence in deployed context |
+
+### Risk derivation matrix
+
+| Likelihood \ Impact | Insignificant | Minor | Moderate | Major | Severe |
+|---|---|---|---|---|---|
+| **Almost Certain** | Medium | Medium | High | High | High |
+| **Likely** | Low | Medium | Medium | High | High |
+| **Possible** | Low | Medium | Medium | Medium | High |
+| **Unlikely** | Low | Low | Medium | Medium | Medium |
+| **Rare** | Low | Low | Low | Medium | Medium |
+
+Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from this matrix. After drafting, explicitly verify each row: look up the (Likelihood, Impact) cell and confirm it matches the stated risk level. Do the same for the residual pair.
+
+If the user's organisation supplies a different matrix or anchors, use theirs and note the substitution.
+
+## Mitigation quality bar
+
+Each measure in column 7 must pass three tests:
+
+1. Names a concrete control, selected by ID from `references/mitigations-catalog.md` (load that file when filling column 7, not before)
+2. States whether it is already in place or planned (with date)
+3. Maps to the rating change consistently with the catalog's "Reduces" column: a likelihood drop needs a control catalogued as reducing Likelihood for that vulnerability class; an impact drop needs a control catalogued as reducing Impact
+
+## Review mode
+
+When the user provides an existing paper to critique, do not rewrite it wholesale. Output a checklist table, then suggested rewrites only for failed items.
+
+| Check | Pass criteria |
+|---|---|
+| RA-01 Aim is BLUF | Decision, residual risk level, both deadlines, extension duration, correct approver tier - all in <=2 sentences |
+| RA-02 Background completeness | System exposure/classification, CVE+CVSS (or weakness class), source, dates all present |
+| RA-03 Justification validity | Falls in an acceptable category with evidence and committed date + owner |
+| RA-04 Review trigger present | Re-assessment conditions stated |
+| RA-05 Matrix consistency | Every Original and Residual Risk cell matches the 5x5 matrix lookup |
+| RA-06 Likelihood traceability | Any likelihood drop maps to a control catalogued as reducing Likelihood for that vulnerability class |
+| RA-07 Impact traceability | Any impact drop maps to a control catalogued as reducing Impact |
+| RA-08 No baseline restatement | No mitigation merely restates pre-existing baseline controls as if new |
+| RA-09 No monitoring-only drops | Risk not lowered on the strength of monitoring/alerting alone (monitoring supports impact reduction via faster containment at most; it does not reduce likelihood) |
+| RA-10 In-place vs planned marked | Every mitigation tagged with status and date; planned mitigations not credited as if operational unless the residual rating explicitly states it applies post-implementation |
+| RA-11 Multi-vuln hygiene | Shared mitigations referenced by control ID, not restated |
+| RA-12 Extension sanity flags | High-residual >1 month, repeat extensions, and >6 month cases carry the required notes |
+
+Output format: the checklist table with Pass/Fail/N.A. per check, one-line evidence for each Fail, then a "Suggested rewrites" section addressing only the Fails.
+
+## Workflow (draft mode)
+
+1. **Gather inputs** per the Required inputs table. One consolidated question for gaps.
+2. **Read** `references/template.md`. Read `references/mitigations-catalog.md` when filling column 7.
+3. **Draft** using the four-section structure and 10-column table. Apply the extension sanity-check flags.
+4. **Self-check** the draft against checks RA-01 to RA-12 before presenting. Explicitly verify matrix lookups (RA-05).
+5. **Flag gaps** rather than inventing facts: mark `[TBC]` inline and list all TBCs at the end.
+
+## Output
+
+Default to a Markdown document with the table. If the user asks for a Word document or formal submission, follow the docx skill and render the table properly there.
