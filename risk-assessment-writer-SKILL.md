@@ -1,6 +1,7 @@
 ---
 name: risk-assessment-writer
 description: Draft, write, structure, or review risk assessment papers, risk acceptance requests, and remediation timeline extension requests for security vulnerabilities. Use this skill whenever the user wants to produce or critique such a document - including requests to "write up", "draft a paper for", "review this risk acceptance", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding. Do not use for general CVE analysis or triage that does not involve producing or reviewing a risk paper.
+originator: Hannkwang
 ---
 
 # Risk Assessment Writer

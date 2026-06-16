@@ -1,6 +1,7 @@
 ---
 name: im8-applicability-check
 description: Determine whether IM8 applies to a system, and guide the user through the questions needed to make that call. Use this skill whenever the user asks "does IM8 apply to...", "is this system in IM8 scope", "do we need IM8 compliance for...", "is this exempt from IM8", or describes a system and wants to know its IM8 obligations - including borderline cases involving systems built outside GEN, commercial/cloud systems, or systems operated by a CLG (commercial-linked / third party). Do not use for assessing compliance against specific IM8 controls once applicability is already settled.
+originator: Hannkwang
 ---
 
 # IM8 Applicability Check
