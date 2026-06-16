@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ideation: Incident-Management Reporting Skill</title>
+<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700|jetbrains-mono:400,500">
+<style>
+  :root{
+    --bg:#f7f7f5; --canvas:#ffffff; --ink:#1c1c1a; --muted:#6a6a64;
+    --line:#e4e3dd; --accent:#9a3412; --accent-soft:#fdf0e9; --accent-text:#7c2d12;
+    --info:#1e4e8c; --info-soft:#eaf1fb; --info-text:#1b3f70;
+    --warn:#8a5a00; --warn-soft:#fbf3e0; --warn-text:#6b4600;
+    --good:#2f6b3a; --good-soft:#e9f4ec; --good-text:#255830;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#16161a; --canvas:#1e1e22; --ink:#e9e8e3; --muted:#a3a29b;
+      --line:#33333a; --accent:#f0875a; --accent-soft:#3a241b; --accent-text:#f4a07d;
+      --info:#7fb0e8; --info-soft:#1d2a3c; --info-text:#9cc3f0;
+      --warn:#e0b25a; --warn-soft:#352b16; --warn-text:#e8c684;
+      --good:#7fc28d; --good-soft:#1c2e21; --good-text:#9bd3a7;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .page{max-width:900px;margin-inline:auto;padding:48px 24px 80px;}
+  .canvas{background:var(--canvas);border:1px solid var(--line);border-radius:14px;
+    padding:40px clamp(20px,5vw,52px);}
+  header.doc h1{font-size:1.85rem;line-height:1.2;margin:.1em 0 .3em;font-weight:700;letter-spacing:-.01em;}
+  .eyebrow{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--accent-text);font-weight:600;}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .meta .chip{font-size:.74rem;font-family:var(--mono);background:var(--bg);
+    border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--muted);}
+  .meta .chip b{color:var(--ink);font-weight:500;}
+  p{max-width:72ch;}
+  h2{font-size:1.25rem;margin:2.4em 0 .2em;font-weight:650;letter-spacing:-.01em;
+    padding-bottom:.3em;border-bottom:1px solid var(--line);}
+  h2 .num{color:var(--muted);font-weight:500;font-size:.9em;margin-right:.4em;}
+  .lead{color:var(--muted);max-width:72ch;}
+  .axes{list-style:none;padding:0;margin:1em 0 0;display:grid;gap:8px;}
+  .axes li{background:var(--bg);border:1px solid var(--line);border-radius:9px;
+    padding:11px 15px;}
+  .axes li b{font-weight:600;}
+  .axes li span{color:var(--muted);}
+  .jump{margin:1.2em 0 .4em;padding:14px 18px;background:var(--bg);
+    border:1px solid var(--line);border-radius:10px;}
+  .jump strong{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .jump ol{margin:.6em 0 0;padding-left:1.3em;columns:2;column-gap:32px;}
+  @media (max-width:640px){.jump ol{columns:1}}
+  .jump a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);}
+  .jump a:hover{border-color:var(--accent);color:var(--accent-text);}
+  article.idea{border:1px solid var(--line);border-radius:13px;padding:26px 28px;
+    margin:20px 0;background:var(--canvas);scroll-margin-top:20px;}
+  article.idea h3{margin:0 0 2px;font-size:1.18rem;font-weight:650;display:flex;
+    align-items:baseline;gap:.5em;flex-wrap:wrap;}
+  .rank{font-family:var(--mono);color:var(--accent-text);background:var(--accent-soft);
+    border-radius:8px;padding:2px 9px;font-size:.85rem;font-weight:600;}
+  .pills{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 16px;}
+  .pill{font-size:.72rem;border-radius:999px;padding:4px 11px;border:1px solid var(--line);
+    font-family:var(--mono);}
+  .pill.axis{background:var(--info-soft);color:var(--info-text);border-color:transparent;}
+  .pill.conf{background:var(--good-soft);color:var(--good-text);border-color:transparent;}
+  .pill.cx{background:var(--warn-soft);color:var(--warn-text);border-color:transparent;}
+  .field{margin:11px 0;}
+  .field .k{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;display:block;margin-bottom:1px;}
+  .basis code, code{font-family:var(--mono);font-size:.86em;background:var(--bg);
+    border:1px solid var(--line);border-radius:5px;padding:1px 5px;}
+  .basis .tag{font-family:var(--mono);font-weight:600;color:var(--accent-text);}
+  figure{margin:18px 0 6px;}
+  figure svg{display:block;max-width:100%;height:auto;background:var(--bg);
+    border:1px solid var(--line);border-radius:10px;}
+  figcaption{font-size:.78rem;color:var(--muted);margin-top:6px;font-style:italic;}
+  table{border-collapse:collapse;width:100%;margin-top:1em;font-size:.92rem;}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  td.n{font-family:var(--mono);color:var(--muted);width:2em;}
+  .callout{background:var(--info-soft);border:1px solid transparent;border-radius:10px;
+    padding:14px 18px;margin:1.2em 0;color:var(--info-text);font-size:.92rem;}
+  .callout b{color:var(--info-text);}
+  footer.composition-signal{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:.76rem;color:var(--muted);font-family:var(--mono);}
+  footer.composition-signal code{font-size:.95em;}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="canvas">
+
+<header class="doc">
+  <div class="eyebrow">Compound Engineering · Ideation</div>
+  <h1>Incident-Management Reporting Skill</h1>
+  <p class="lead">Directions worth exploring for a skill that, during a live incident,
+  drafts the immediate WhatsApp group message, the senior-stakeholder email, and the
+  phone-call brief to update PS — from what is known at the time.</p>
+  <div class="meta">
+    <span class="chip"><b>Date</b> 2026-06-16</span>
+    <span class="chip"><b>Topic</b> incident-reporting-skill</span>
+    <span class="chip"><b>Focus</b> multi-channel incident reporting (WhatsApp / email / call)</span>
+    <span class="chip"><b>Mode</b> repo-grounded</span>
+  </div>
+</header>
+
+<section>
+<h2>Grounding Context</h2>
+<p><b>Codebase context.</b> This repo is a small collection of Singapore-public-service
+security &amp; compliance Claude skills, each a single self-contained <code>*-SKILL.md</code>
+with YAML frontmatter (<code>name</code>, <code>description</code>) plus reference files. Two
+ship today: <code>risk-assessment-writer</code> and <code>im8-applicability-check</code>. The
+established house conventions ideation should reuse rather than reinvent:</p>
+<ul>
+  <li><b>BLUF / decision-first.</b> Every output leads with the decision or status in one or two
+  lines, "no throat-clearing" (risk-assessment-writer, core principle 1).</li>
+  <li><b>Guided batch intake.</b> Skills extract what the user already said, then ask for the
+  rest in <em>one</em> consolidated message, marking gaps <code>[TBC]</code> and listing all TBCs at
+  the end — never one-question-at-a-time interrogation.</li>
+  <li><b>Required-inputs tables &amp; fixed output structures.</b> Both skills pin an exact
+  section order and a self-check pass before presenting.</li>
+  <li><b>Severity / risk vocabulary.</b> risk-assessment-writer carries a 5×5 likelihood×impact
+  matrix and a mitigations catalog; the incident example already reasons in this language
+  ("Risk assessed as low", "Incident severity: Medium per SN incident guidelines").</li>
+  <li><b>SG-gov domain furniture in the worked example.</b> SITREP, GIROC, PS/DS, ACISO,
+  classification, WPD/HR coordination, and a recurrence signal ("second SN PKI card loss in two
+  months").</li>
+</ul>
+<p><b>The worked WhatsApp example</b> supplied at invocation is the primary evidence artifact. It
+has a stable shape: a bracketed header line <code>[Incident] [date time] [title]</code>, then numbered
+items grouped under <em>Incident Details → Actions Taken → (embedded) Risk &amp; Severity → Proposed
+Actions → Next steps</em>. External web research was not run — this is an internal SG-gov reporting
+format with no useful public prior art to scan beyond the cross-domain analogies cited per idea.</p>
+</section>
+
+<section>
+<h2>Topic Axes</h2>
+<p class="lead">The subject was decomposed into five orthogonal surfaces; each idea below targets one.</p>
+<ul class="axes">
+  <li><b>Channel formats</b> — <span>the three artifacts as distinct shapes: WhatsApp (short, scannable), email (fuller, on-record), phone brief (spoken, seconds).</span></li>
+  <li><b>Information intake</b> — <span>capturing and structuring what is known at the time of an incident.</span></li>
+  <li><b>Accuracy &amp; safety guardrails</b> — <span>honesty about unknowns, consistency across the three artifacts, classification/channel sensitivity.</span></li>
+  <li><b>Severity &amp; escalation routing</b> — <span>deciding severity and who must be told (PS / DS / SITREP / the group) through which channel.</span></li>
+  <li><b>Progressive updates</b> — <span>first-alert → follow-ups → closure as the incident evolves.</span></li>
+</ul>
+</section>
+
+<section>
+<h2>Ranked Ideas</h2>
+
+<nav class="jump" aria-label="Ranked ideas">
+  <strong>Jump to</strong>
+  <ol>
+    <li><a href="#i1">One incident record → three consistent renders</a></li>
+    <li><a href="#i2">Guided batch intake (blank-page killer)</a></li>
+    <li><a href="#i3">Confidence-tagged facts &amp; an explicit "not yet known" line</a></li>
+    <li><a href="#i4">Phone-to-PS as a spoken SBAR brief with a Q&amp;A card</a></li>
+    <li><a href="#i5">Severity classifier &amp; escalation-routing recommendation</a></li>
+    <li><a href="#i6">Incident lifecycle with delta-only follow-ups</a></li>
+    <li><a href="#i7">Recurrence detection feeding Proposed Actions</a></li>
+  </ol>
+</nav>
+
+<article class="idea" id="i1">
+  <h3><span class="rank">1</span> One incident record → three consistent renders</h3>
+  <div class="pills">
+    <span class="pill axis">axis · channel formats</span>
+    <span class="pill conf">confidence 90%</span>
+    <span class="pill cx">complexity Medium</span>
+  </div>
+  <p>Capture the incident once into a single canonical structured record (the facts, timeline,
+  actions, risk, severity, proposed actions), then mechanically project it into all three
+  artifacts — WhatsApp, email, phone brief — in one pass. The three outputs are <em>views</em> of one
+  source, not three independently authored drafts.</p>
+
+  <figure>
+  <svg viewBox="0 0 720 240" role="img" aria-label="One incident record fanning out into three channel renders">
+    <style>
+      .bx{fill:var(--canvas);stroke:var(--line);stroke-width:1.5}
+      .src{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+      .lbl{font-family:var(--sans);font-size:13px;fill:var(--ink)}
+      .lblm{font-family:var(--sans);font-size:11px;fill:var(--muted)}
+      .arr{stroke:var(--accent);stroke-width:1.6;fill:none}
+    </style>
+    <rect class="src" x="22" y="92" width="160" height="56" rx="9"/>
+    <text class="lbl" x="102" y="116" text-anchor="middle" font-weight="600">Incident record</text>
+    <text class="lblm" x="102" y="134" text-anchor="middle">one canonical source</text>
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+    <path class="arr" marker-end="url(#ah)" d="M182,108 C250,108 250,42 320,42"/>
+    <path class="arr" marker-end="url(#ah)" d="M182,120 C250,120 250,120 320,120"/>
+    <path class="arr" marker-end="url(#ah)" d="M182,132 C250,132 250,198 320,198"/>
+    <rect class="bx" x="320" y="18" width="184" height="48" rx="9"/>
+    <text class="lbl" x="334" y="40" font-weight="600">WhatsApp</text>
+    <text class="lblm" x="334" y="56">short · scannable · BLUF</text>
+    <rect class="bx" x="320" y="96" width="184" height="48" rx="9"/>
+    <text class="lbl" x="334" y="118" font-weight="600">Email to stakeholders</text>
+    <text class="lblm" x="334" y="134">fuller · on the record</text>
+    <rect class="bx" x="320" y="174" width="184" height="48" rx="9"/>
+    <text class="lbl" x="334" y="196" font-weight="600">Phone brief (PS)</text>
+    <text class="lblm" x="334" y="212">spoken · seconds</text>
+    <rect class="bx" x="548" y="78" width="150" height="84" rx="9" stroke-dasharray="4 3"/>
+    <text class="lbl" x="623" y="112" text-anchor="middle" font-weight="600">Same facts,</text>
+    <text class="lbl" x="623" y="130" text-anchor="middle" font-weight="600">no drift</text>
+  </svg>
+  <figcaption>Illustrative — one capture renders three channel-shaped outputs that cannot contradict each other.</figcaption>
+  </figure>
+
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> The supplied example already is a single fact set rendered in
+  WhatsApp shape; the email and call simply re-cut the same numbered items (Incident Details,
+  Actions Taken, Risk/Severity, Proposed Actions). The repo's two skills both pin "a fixed output
+  structure from structured inputs," so a record-first design is the house pattern, not a new one.</div>
+  <div class="field"><span class="k">Rationale</span> Under incident time pressure the expensive,
+  error-prone work is re-keying the same facts into three formats and keeping them consistent — the
+  exact failure where the WhatsApp says "low" and the email says "medium." Make consistency
+  structural rather than a discipline the reporter has to maintain at 2am.</div>
+  <div class="field"><span class="k">Downsides</span> Requires defining the canonical schema up
+  front; if the three channel templates diverge in what they must contain, the projection logic
+  carries that complexity. Over-templating could make outputs feel robotic for nuanced incidents.</div>
+</article>
+
+<article class="idea" id="i2">
+  <h3><span class="rank">2</span> Guided batch intake (blank-page killer)</h3>
+  <div class="pills">
+    <span class="pill axis">axis · information intake</span>
+    <span class="pill conf">confidence 88%</span>
+    <span class="pill cx">complexity Low</span>
+  </div>
+  <p>Don't ask the reporter to write — ask them structured questions. A required-inputs checklist
+  (what/who, when discovered, when reported, actions taken, risk read, severity, proposed actions,
+  audience) extracted first from whatever they already pasted, then the gaps asked in one batch,
+  with anything still open marked <code>[TBC]</code> and listed at the end. The skill writes; the human supplies facts.</p>
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> Both shipping skills implement exactly this — "First, extract
+  what the user has already told you… then ask the rest in ONE batch" (im8-applicability) and the
+  Required-inputs table + "mark unknowns <code>[TBC]</code>" pattern (risk-assessment-writer).</div>
+  <div class="field"><span class="k">Rationale</span> During an incident the reporter is rattled
+  and time-poor; a blank "describe the incident" prompt yields slow, uneven output. A checklist
+  guarantees the non-negotiable fields (discovery time vs report time, police-report status, account
+  disabled y/n) are never silently dropped — the things senior management asks about first.</div>
+  <div class="field"><span class="k">Downsides</span> A rigid checklist can feel like friction for a
+  trivial incident; needs a fast-path for when the reporter pastes a near-complete narrative. Must
+  resist asking questions whose answers were already given.</div>
+</article>
+
+<article class="idea" id="i3">
+  <h3><span class="rank">3</span> Confidence-tagged facts &amp; an explicit "not yet known" line</h3>
+  <div class="pills">
+    <span class="pill axis">axis · accuracy &amp; safety guardrails</span>
+    <span class="pill conf">confidence 85%</span>
+    <span class="pill cx">complexity Low</span>
+  </div>
+  <p>Tag each captured fact as <b>confirmed</b>, <b>reported</b>, or <b>unconfirmed</b>, and carry
+  those tags through every artifact. Each output ends with a short "What we don't yet know" line so
+  senior management can see the edge of current knowledge instead of inferring false certainty. This
+  is the operational meaning of the user's own framing — "based on what is known at the time." It
+  also absorbs a classification guardrail: keep sensitive detail off WhatsApp and point to a secure follow-up.</p>
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> The example mixes confidence levels silently — "No suspicious
+  login activity detected, ongoing monitoring in place" (an evolving observation) sits beside hard
+  facts like "account and PKI card disabled immediately." <span class="tag">reasoned:</span> Senior
+  management acts on these messages within minutes; an unmarked unconfirmed fact that later flips is
+  the most damaging failure mode of fast reporting, so the skill should make confidence first-class.</div>
+  <div class="field"><span class="k">Rationale</span> Reframes "what is known at the time" from a
+  caveat the reporter remembers to add, into a property the skill enforces — and gives the next
+  update (idea 6) a precise list of what to chase: the items still tagged unconfirmed.</div>
+  <div class="field"><span class="k">Downsides</span> Over-tagging can clutter a message meant to be
+  scannable; the rendering must keep tags lightweight (e.g. only flag unconfirmed items, treat
+  confirmed as the default). Reporters may guess at confidence — needs gentle prompting, not enforcement.</div>
+</article>
+
+<article class="idea" id="i4">
+  <h3><span class="rank">4</span> Phone-to-PS as a spoken SBAR brief with a Q&amp;A card</h3>
+  <div class="pills">
+    <span class="pill axis">axis · channel formats</span>
+    <span class="pill conf">confidence 80%</span>
+    <span class="pill cx">complexity Low</span>
+  </div>
+  <p>The phone update is not a document read aloud — it is a 30-second spoken brief plus an
+  anticipated-questions card. Render it in SBAR order (<b>S</b>ituation, <b>B</b>ackground,
+  <b>A</b>ssessment, <b>R</b>ecommendation), written for the ear: short sentences, the ask stated
+  plainly, and 3–4 likely PS questions ("Is it contained? Is data exposed? Who else knows? What do you
+  need from me?") with one-line answers ready.</p>
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">external:</span> SBAR is the standard verbal-handoff structure in clinical and
+  emergency-response settings precisely for high-stakes, time-boxed spoken updates — a well-matched
+  analogy for briefing a Permanent Secretary by phone. <span class="tag">direct:</span> The example's
+  numbered prose is unreadable aloud; a caller needs a different shape than the WhatsApp text.</div>
+  <div class="field"><span class="k">Rationale</span> The phone call is the most pressured of the
+  three channels and the one the reporter is least equipped to improvise. A spoken script plus a
+  Q&amp;A card directly de-risks the moment most likely to go badly, and SBAR's "Recommendation" slot
+  forces a clear ask rather than a status dump.</div>
+  <div class="field"><span class="k">Downsides</span> Spoken style diverges from the written
+  artifacts, so it's the one render that isn't a clean projection of the record — adds template
+  surface. Anticipated questions are heuristic and may miss what a given PS actually asks.</div>
+</article>
+
+<article class="idea" id="i5">
+  <h3><span class="rank">5</span> Severity classifier &amp; escalation-routing recommendation</h3>
+  <div class="pills">
+    <span class="pill axis">axis · severity &amp; escalation routing</span>
+    <span class="pill conf">confidence 78%</span>
+    <span class="pill cx">complexity Medium</span>
+  </div>
+  <p>From the captured facts, propose a severity rating against the SN incident guidelines and, from
+  that, a routing recommendation: which audiences must be told (group / PS / DS / SITREP), through
+  which channel, and by when. The output is advisory — it surfaces the call and its reasoning so the
+  reporter confirms rather than guesses under pressure.</p>
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> The example already carries both a severity verdict ("Incident
+  severity: Medium per SN incident guidelines") and routing decisions ("Incident to be reported to
+  SITREP on 11 Jan evening"; "incident report update to PS and DS"). <span class="tag">reasoned:</span>
+  The repo's risk-assessment-writer shows the house already trusts matrix-anchored severity calls, so
+  encoding the SN severity bands is consistent with existing practice.</div>
+  <div class="field"><span class="k">Rationale</span> Mis-rating severity or missing a required
+  notification is a governance failure, not a style miss. Making the skill propose-and-justify (with
+  the reporter as the approving check) catches the omission while keeping a human accountable for the call.</div>
+  <div class="field"><span class="k">Downsides</span> Depends on the actual SN severity bands and
+  notification thresholds, which must be supplied (likely <code>[TBC]</code> until provided) — the skill
+  should not invent them. Routing rules may differ by incident type and evolve.</div>
+</article>
+
+<article class="idea" id="i6">
+  <h3><span class="rank">6</span> Incident lifecycle with delta-only follow-ups</h3>
+  <div class="pills">
+    <span class="pill axis">axis · progressive updates</span>
+    <span class="pill conf">confidence 76%</span>
+    <span class="pill cx">complexity Medium</span>
+  </div>
+  <p>Treat an incident as a short-lived stateful object with explicit statuses — <b>First alert →
+  Ongoing → Contained → Closed</b> — and generate updates accordingly. A "first alert" mode reports
+  honestly when almost nothing is confirmed yet but commits a next-update time; follow-ups render only
+  the <em>delta</em> since the last message, so senior management reads what changed rather than
+  re-reading the whole timeline.</p>
+
+  <figure>
+  <svg viewBox="0 0 720 130" role="img" aria-label="Incident status flow from first alert to closed, with delta updates between states">
+    <style>
+      .st{fill:var(--info-soft);stroke:var(--info);stroke-width:1.5}
+      .stl{font-family:var(--sans);font-size:13px;fill:var(--info-text);font-weight:600}
+      .fl{stroke:var(--info);stroke-width:1.6;fill:none}
+      .dl{font-family:var(--sans);font-size:10.5px;fill:var(--muted)}
+    </style>
+    <defs><marker id="fa" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="var(--info)"/></marker></defs>
+    <rect class="st" x="14" y="46" width="120" height="40" rx="8"/>
+    <text class="stl" x="74" y="71" text-anchor="middle">First alert</text>
+    <rect class="st" x="200" y="46" width="120" height="40" rx="8"/>
+    <text class="stl" x="260" y="71" text-anchor="middle">Ongoing</text>
+    <rect class="st" x="386" y="46" width="120" height="40" rx="8"/>
+    <text class="stl" x="446" y="71" text-anchor="middle">Contained</text>
+    <rect class="st" x="572" y="46" width="120" height="40" rx="8"/>
+    <text class="stl" x="632" y="71" text-anchor="middle">Closed</text>
+    <path class="fl" marker-end="url(#fa)" d="M134,66 L196,66"/>
+    <path class="fl" marker-end="url(#fa)" d="M320,66 L382,66"/>
+    <path class="fl" marker-end="url(#fa)" d="M506,66 L568,66"/>
+    <text class="dl" x="165" y="36" text-anchor="middle">+ delta</text>
+    <text class="dl" x="351" y="36" text-anchor="middle">+ delta</text>
+    <text class="dl" x="537" y="36" text-anchor="middle">+ delta</text>
+  </svg>
+  <figcaption>Illustrative — each transition emits a delta update; readers track change, not the whole timeline again.</figcaption>
+  </figure>
+
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> The example closes with "Next steps: No further updates required"
+  — a status signal that presumes a lifecycle the skill could make explicit. <span class="tag">external:</span>
+  Military / emergency-ops SITREPs (which the domain already uses) are inherently serial status
+  updates with stated states, and the "report only what changed" convention is standard practice for
+  recurring command updates.</div>
+  <div class="field"><span class="k">Rationale</span> The user explicitly needs reporting "within
+  minutes" and again as things evolve. Pairs tightly with idea 3: the delta is computed from which
+  unconfirmed facts became confirmed and which actions completed since the last message.</div>
+  <div class="field"><span class="k">Downsides</span> Requires persisting prior-update state across
+  turns, which is more than a one-shot draft; for short incidents the lifecycle may be overkill. A
+  pure-delta message can lose context for a recipient who missed the prior one — may need a
+  "since first reported" recap toggle.</div>
+</article>
+
+<article class="idea" id="i7">
+  <h3><span class="rank">7</span> Recurrence detection feeding Proposed Actions</h3>
+  <div class="pills">
+    <span class="pill axis">axis · severity &amp; escalation routing</span>
+    <span class="pill conf">confidence 72%</span>
+    <span class="pill cx">complexity Medium</span>
+  </div>
+  <p>When the reporter (or a lightweight incident log) indicates this is not the first of its kind,
+  the skill flags the pattern — "Nth similar incident in X months" — and uses it to seed the
+  <em>Proposed Actions</em> section with systemic measures, distinct from the per-incident response.
+  This is the bridge from immediate reporting toward the downstream formal report to PS/DS and
+  potentially the existing <code>risk-assessment-writer</code> skill.</p>
+  <div class="field basis"><span class="k">Basis</span>
+  <span class="tag">direct:</span> The example's items 9–11 are exactly this move — "This is the
+  second SN PKI card loss in two months by different officers, indicating need for enhanced measures"
+  → a concrete systemic proposal (mass email, storage guidelines, awareness training) → an owner and
+  a downstream report to PS and DS.</div>
+  <div class="field"><span class="k">Rationale</span> The Proposed Actions section is where an
+  incident report stops being a log and starts driving change; recurrence is the single strongest
+  trigger for it. Captures compounding value — one incident capture feeds the immediate messages, the
+  SITREP entry, and the systemic case — rather than throwing the record away after the WhatsApp send.</div>
+  <div class="field"><span class="k">Downsides</span> True recurrence detection needs an incident
+  history the skill may not have; absent a log, it relies on the reporter knowing and saying so.
+  Over-eagerly proposing systemic measures on a one-off could read as alarmist — the flag should be
+  evidence-gated, not default-on.</div>
+</article>
+
+<div class="callout"><b>Backbone.</b> Ideas 1–3 form the core the rest hang off: a single
+<b>record</b> (1), filled by <b>guided intake</b> (2), with <b>confidence-tagged facts</b> (3).
+Ideas 4–7 are higher-value extensions — spoken-channel handling, severity routing, lifecycle
+updates, and recurrence — that all read from that same record. A first version could ship the
+backbone alone and still be useful.</div>
+</section>
+
+<section>
+<h2>Rejection Summary</h2>
+<table>
+<thead><tr><th class="n">#</th><th>Considered idea</th><th>Reason cut</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td>Standalone "RESTRICTED-aware redaction mode" keeping sensitive detail off WhatsApp</td><td>Real SG-gov concern, but folds into idea 3 as a guardrail rather than standing alone.</td></tr>
+<tr><td class="n">2</td><td>Reuse the full 5×5 likelihood×impact matrix from risk-assessment-writer for the incident risk line</td><td>Not standalone — belongs inside idea 5's severity classifier, and incident severity bands (SN guidelines) differ from the remediation risk matrix.</td></tr>
+<tr><td class="n">3</td><td>Newsroom "inverted pyramid" rendering for all three artifacts</td><td>Duplicates the BLUF/decision-first convention already baked into ideas 1 and 4; no new shape.</td></tr>
+<tr><td class="n">4</td><td>Audience-tailored cuts for 100+ arbitrary stakeholders from one record</td><td>Scope overrun — the real audience set is bounded (group / PS / DS / SITREP) and already covered by ideas 1 and 5.</td></tr>
+<tr><td class="n">5</td><td>Git-style versioned "diff" of every field across updates</td><td>Below the bar as its own idea; the useful part (show what changed) is idea 6's delta updates without the version-control machinery.</td></tr>
+<tr><td class="n">6</td><td>Auto-send / integrate directly with WhatsApp and the mail client</td><td>Out of scope for an ideation about drafting; sending is an integration concern with its own approval and audit implications, better as a separate brainstorm.</td></tr>
+</tbody>
+</table>
+</section>
+
+<footer class="composition-signal">Composed 2026-06-16 by ce-ideate from the user's invocation prompt (incident-reporting skill request + worked WhatsApp example). Grounded against <code>risk-assessment-writer-SKILL.md</code> and <code>im8-applicability-SKILL.md</code>.</footer>
+
+</div>
+</div>
+</body>
+</html>
