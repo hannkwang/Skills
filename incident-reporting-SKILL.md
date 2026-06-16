@@ -24,11 +24,13 @@ Build this once per invocation, before any render:
 
 | Field | Required | Notes |
 |---|---|---|
-| Date/time (happened / discovered / reported) | Yes | Core field - triggers clarification if missing |
+| Date/time (happened / discovered / reported) | Yes | Core field - triggers clarification if missing. Capture all three when known; the **reported time** is what the header/subject carry (see below) |
 | What happened | Yes | Core field - triggers clarification if missing |
 | Incident/Alert status, per fact | Yes | Core field - tag every fact below as it's captured, not as an afterthought |
-| Severity | Yes, if the user is in a position to state one | Core field - if the user genuinely doesn't know yet, mark `[TBC]`, don't block on it indefinitely |
+| Severity | Yes, if the user is in a position to state one | Core field - on the scale Low/Medium/High/Severe/Very Severe; if the user genuinely doesn't know yet, mark `[TBC]`, don't block on it indefinitely |
 | Freeform notes | No | Actions taken, proposed actions, named individuals, who reported it, who it was reported to, next steps - everything else |
+
+**Header/subject timestamp.** The bracketed `[date time]` in the WhatsApp header and email subject is the **reported time** - when the incident was reported/the update issued - not when it happened. The happened/discovered times belong in the body (Incident Details / Background), where the full event timeline is laid out.
 
 **Confidence tags.** As you extract or record each fact, tag it:
 - `Incident` - established beyond doubt (e.g., "account disabled at 2115hrs" once done)
@@ -50,10 +52,10 @@ Produce all three from the same record, in one pass. A fact's Incident/Alert sta
 
 Short and scannable, for an immediate update to a senior-management group.
 
-- Bracketed header: `[Incident]` or `[Alert]` (per the Message classification rule above) followed by `[date time] [title]`
+- Bracketed header: `[Incident]` or `[Alert]` (per the Message classification rule above) followed by `[reported date time] [title]` (header timestamp is the reported time, per the rule above)
 - Numbered items grouped under plain labels as they apply: **Incident Details**, **Actions Taken**, **Proposed Actions**, **Next Steps**
-- A line surfacing any fact still tagged `Alert` (e.g., "Still verifying: ...")
-- State severity once, plainly (e.g., "Severity: Medium" - scale: Low/Medium/High/Severe/Very Severe)
+- A line surfacing any fact still tagged `Alert` (e.g., "Still verifying: ...") - omit this line entirely when no fact is tagged `Alert`
+- State severity once, plainly (e.g., "Severity: Medium" - per the scale defined in the incident record)
 
 ### Email render
 
@@ -76,7 +78,7 @@ Regards,
 [Sender]
 ```
 
-- **Subject line** - mirrors the WhatsApp header (`[Incident]`/`[Alert]`, date/time, title) so the email is identifiable at a glance in an inbox.
+- **Subject line** - mirrors the WhatsApp header (`[Incident]`/`[Alert]`, reported date/time, title) so the email is identifiable at a glance in an inbox.
 - **Dear PS / cc line** - addressed to PS, cc'ing DSes and Dirs by default; adjust names if the user specifies different recipients.
 - **Aim** - one line stating why this email is being sent (e.g., "To update PS on...").
 - **Background** - the fuller narrative: what happened, when and where, who is involved (named individuals from freeform notes), how it was discovered or reported, and - when the record holds it - the asset, system, or data classification affected. Do not compress this into one line if the record has more to say.
@@ -113,7 +115,9 @@ A direct, one-directional verbal briefing to PS (or another very senior officer)
 
 ## Output
 
-Present the incident record (fields and confidence tags) first, then the three renders in order: WhatsApp, email, situation-brief, followed by the email's anticipated executive questions block. Separate the record and each block with a plain divider line (`--------`) so they don't visually run together. If any required core field is `[TBC]`, surface that plainly above the renders, not buried inside them.
+Present the incident record (fields and confidence tags) first, then the renders in order: WhatsApp, email, the email's anticipated executive questions block, then situation-brief. Separate the record and each block with a plain divider line (`--------`) so they don't visually run together. If any required core field is `[TBC]`, surface that plainly above the renders, not buried inside them.
+
+**Before presenting, run a consistency check across the renders:** confirm that severity, each fact's Incident/Alert status, and every core fact (date/time, what happened) read identically in all three. This is the whole point of working from one record - if any of these has drifted between channels, fix it before presenting.
 
 ## Scope boundaries
 
