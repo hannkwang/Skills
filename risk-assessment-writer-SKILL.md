@@ -1,17 +1,18 @@
 ---
 name: risk-assessment-writer
-description: Draft, write, structure, or review risk assessment papers, risk acceptance requests, and remediation timeline extension requests for security vulnerabilities. Use this skill whenever the user wants to produce or critique such a document - including requests to "write up", "draft a paper for", "review this risk acceptance", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding. Do not use for general CVE analysis or triage that does not involve producing or reviewing a risk paper.
+description: Generate a risk assessment paper, risk acceptance request, or remediation timeline extension request from a freeform description of a security vulnerability. Use this skill whenever the user describes a vulnerability and wants it turned into a decision-ready risk paper - including requests to "generate a risk assessment", "write up", "draft a paper for", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding. Do not use for general CVE analysis or triage that does not involve producing a risk paper.
 originator: Hannkwang
 ---
 
 # Risk Assessment Writer
 
-Help engineers write decision-ready risk assessment papers (or formal risk acceptance). The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user provides; mark any missing fields `[TBC]` and list all TBCs at the end.
+Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]` and list all TBCs at the end.
 
 ## Dependencies
 
 Before proceeding, also load:
 - `mitigations-catalog.md` — approved controls catalog for column 7; load when filling Mitigation Measures, not before
+- `risk-assessment-example.md` — one complete worked paper showing the full output shape (Aim → Background → Justification → populated 10-column row → matrix verification → dual-expert critique); load on first draft if unsure of the structure
 
 ## Core principles
 
@@ -57,23 +58,24 @@ ALWAYS use this exact four-section structure:
 
 ## Section guidance
 
+Keep the narrative sections tight: the **Aim is exactly one line** (BLUF). **Background and Justification are at most 3 lines each** — succinct, no padding; one line is fine if it covers the facts. (The §4 table carries the detail.) For a multi-vulnerability paper the 3-line limit applies *per vulnerability*.
+
 ### 1. Aim
 
-State in 1 line:
-- What approval is sought (extension of remediation timeline / formal risk acceptance)
-- The residual risk level to be carried (High / Medium / Low)
-- Original deadline, requested deadline, and the resulting extension duration (if applicable)
+One line stating: the approval sought (timeline extension / formal risk acceptance), the residual risk level to be carried (High / Medium / Low), and — if a timeline extension — original deadline → requested deadline and the resulting extension duration. BLUF only; no caveats.
 
 Example: "To seek GRC approval for formal risk acceptance of one Medium residual risk vulnerability on System X."
 Example: "To seek approval from GRC for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
 
 ### 2. Background
 
-One line each: **System** (name, function, classification, exposure, users); **Vulnerability** (CVE+CVSS, or weakness class if no CVE, plus what it enables on THIS system); **Source/dates** (how found, date reported, original deadline). Multiple vulns: one line per CVE/source; don't bundle unrelated risks.
+Succinct, up to 3 lines, covering: the **system** (name, function, classification, exposure, users), the **vulnerability** (CVE+CVSS or weakness class, plus what it enables on THIS system), and **how/when found** (source, date reported, original deadline).
+
+Example: "HRConnect — CONFIDENTIAL intranet-facing HR/payroll portal for ~2,500 staff — runs Apache OFBiz 18.12.x affected by CVE-2024-38856 (CVSS 9.8), an unauthenticated auth bypass allowing RCE as the service account; found via VMS scan on 20 May 2026, original deadline 20 Jun 2026."
 
 ### 3. Justification
 
-One line: why can't the team fix this within the original timeline? Pick a category below, cite the evidence (vendor advisory, test results, freeze memo), and state the committed remediation date + owner. "Team is busy" without sequencing context is not a justification.
+Succinct, up to 3 lines, stating: why the team cannot remediate within the original timeline (pick a category below, cite the evidence), the committed remediation date and owner, **and** the review trigger (conditions forcing immediate re-assessment regardless of the approved deadline — public PoC/exploit release, observed exploitation, change in exposure). "Team is busy" without sequencing context is not a justification.
 
 | Category | Example |
 |---|---|
@@ -83,7 +85,7 @@ One line: why can't the team fix this within the original timeline? Pick a categ
 | Architectural work | Fix requires redesign (e.g., auth rework), not a patch |
 | Resource/sequencing | Same team remediating a higher-severity finding first |
 
-Always include a **review trigger**: conditions forcing immediate re-assessment regardless of the approved deadline (public PoC/exploit release, observed exploitation, change in exposure).
+Example: "Patch removes the `ProgramExport` endpoint that 23 custom payroll scripts depend on, requiring a 12-week rewrite onto the service framework (impact assessment REF-2026-HR-112); committed by 20 Sep 2026, owner HR Systems Team Lead; re-assess immediately on public PoC release, observed exploitation, or any change to LAN/VPN-only exposure."
 
 ### 4. Impact, Risk Assessment and Mitigation
 
@@ -97,7 +99,7 @@ Present as a table with EXACTLY these 10 columns:
 | 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
 | 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
 | 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., applicable regulatory reporting, contractual breach penalties) |
-| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `mitigations-catalog.md` by control ID (load that file when filling this column, not before). Any likelihood/impact drop in cols 8-9 must use a control the catalog's "Reduces" column lists for that axis. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
+| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `mitigations-catalog.md` by control ID (load that file when filling this column, not before). Any likelihood/impact drop in cols 8-9 must use a control the catalog's "Reduces" column lists for that axis **AND** whose "Applicable to" class covers this vulnerability - a control that reduces the right axis but does not apply to this weakness class is invalid. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
 | 8 | Residual Likelihood | Post-mitigation 5-level rating + which control ID(s) caused the change |
 | 9 | Residual Impact | Post-mitigation 5-level rating + which control ID(s) caused the change |
 | 10 | Residual Risk | High/Medium/Low derived from the same 5x5 matrix |
@@ -137,6 +139,8 @@ Present as a table with EXACTLY these 10 columns:
 | **Rare** | Low | Low | Low | Medium | Medium |
 
 Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from this matrix. After drafting, explicitly verify each row: look up the (Likelihood, Impact) cell and confirm it matches the stated risk level. Do the same for the residual pair.
+
+Also confirm residual risk is **not higher** than original. If the residual risk **band** equals the original band (the mitigations did not move the rated risk), state this explicitly in the Impact Assessment column and the §4 verification line — do not present unchanged risk as if it had been mitigated. Keep this disclosure **out of the Aim**: the Aim stays BLUF (the decision requested only). Note that a band can hold even when one axis moves (e.g., Possible→Unlikely with Impact unchanged may stay Medium); the disclosure is about the band, not the axes.
 
 If the user's organisation supplies a different matrix or anchors, use theirs and note the substitution.
 
