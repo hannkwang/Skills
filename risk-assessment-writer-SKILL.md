@@ -6,7 +6,7 @@ originator: Hannkwang
 
 # Risk Assessment Writer
 
-Help engineers write decision-ready risk assessment papers requesting an extension of a vulnerability remediation timeline (or formal risk acceptance). The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user provides; mark any missing fields `[TBC]` and list all TBCs at the end.
+Help engineers write decision-ready risk assessment papers (or formal risk acceptance). The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user provides; mark any missing fields `[TBC]` and list all TBCs at the end.
 
 ## Dependencies
 
@@ -42,6 +42,8 @@ Use whatever the user provides. Do not ask for missing information upfront — p
 | Any second or subsequent extension for the same finding | State the extension history (count + cumulative duration) in the Aim |
 | Extension > 6 months | Recommend converting to formal risk acceptance with scheduled re-assessment instead of a timeline extension |
 
+When this is the **first extension**, do not state that fact in the Aim — it is the default case and adds noise. Only surface extension history when a prior extension exists.
+
 ## Document structure
 
 ALWAYS use this exact four-section structure:
@@ -58,10 +60,11 @@ ALWAYS use this exact four-section structure:
 ### 1. Aim
 
 State in 1 line:
-- What approval is sought (extension of remediation timeline / risk acceptance)
+- What approval is sought (extension of remediation timeline / formal risk acceptance)
 - The residual risk level to be carried (High / Medium / Low)
-- Original deadline, requested deadline, and the resulting extension duration
+- Original deadline, requested deadline, and the resulting extension duration (if applicable)
 
+Example: "To seek GRC approval for formal risk acceptance of one Medium residual risk vulnerability on System X."
 Example: "To seek approval from GRC for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
 
 ### 2. Background
@@ -93,7 +96,7 @@ Present as a table with EXACTLY these 10 columns:
 | 3 | Likelihood | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
 | 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
 | 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
-| 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., PDPA breach reporting) |
+| 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., applicable regulatory reporting, contractual breach penalties) |
 | 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `mitigations-catalog.md` by control ID (load that file when filling this column, not before). Any likelihood/impact drop in cols 8-9 must use a control the catalog's "Reduces" column lists for that axis. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
 | 8 | Residual Likelihood | Post-mitigation 5-level rating + which control ID(s) caused the change |
 | 9 | Residual Impact | Post-mitigation 5-level rating + which control ID(s) caused the change |
@@ -149,21 +152,42 @@ Default to a Markdown document with the table. If the user asks for a Word docum
 
 ## Expert critique
 
-After the RECOMMENDATION, always append a `### Critique` block. Write it in the voice of a senior cybersecurity reviewer or internal auditor stress-testing the paper before it reaches the approving authority. The goal is to surface weaknesses the approver would ask about — before they ask.
+At the end of the paper, always append a `### Critique` block with two expert sub-sections. Each expert raises exactly **2 challenges** — the most significant for this specific paper. Each bullet leads with a **bold label**, then 1–2 sentences of challenge. Do not soften findings. Omit angles that are clearly inapplicable to this paper.
 
-Present the critique as a bulleted list of exactly **3 items** — the three most significant challenges for this specific paper. Rank by potential to change the approver's decision. Each bullet leads with a short label in bold, then one or two sentences of challenge. Do not soften findings; an auditor who finds nothing to challenge is not doing their job.
+---
 
-Draw from the following angles when selecting the top 3:
+#### Cybersecurity Expert
 
-**Residual risk rating**
-- Is the residual rating mechanically supported, or does it rely on a control that has not been operationally validated in this environment?
-- Would failure of any single mitigation restore the original risk level? If yes, the residual rating may be overstated.
-- Challenge any two-level drops (e.g., High → Low) as requiring unusually strong evidence.
+Voice: A senior penetration tester or threat analyst stress-testing the technical substance of the paper. Goal: surface where the risk or vulnerability has been under-scoped, or where the mitigations do not credibly justify the residual rating.
 
-**Justification scrutiny**
-- Is the stated constraint externally verifiable (vendor advisory, test results, freeze memo) or self-asserted by the team requesting the extension?
-- Does the extension duration match the constraint? A 2-month vendor delay does not justify a 4-month extension.
-- Is this the first extension for this finding? If not, challenge why the prior extension did not result in remediation.
-- "Authenticated" as a prerequisite: challenge whether a large registered user base (e.g., 500,000 accounts) is a meaningful barrier, given the viability of credential stuffing, phishing, or insider misuse.s
+Pick the **2 most significant** from these angles:
 
-Omit angles that are clearly not applicable (e.g., do not probe WAF bypass if no WAF is in the paper). Keep the critique honest but proportionate — a Low residual risk with strong, specific mitigations warrants fewer challenges than a High residual risk with thin controls.
+**Vulnerability scoping**
+- Has the vulnerability been assessed in the context of THIS system's configuration and exposure, or is the CVSS base score being applied uncritically without environmental adjustment?
+- Are chained exploitation paths (e.g., combining this CVE with another known weakness on the same system) considered, or dismissed without justification?
+- Is the threat actor realistically scoped? Challenge "Unlikely" ratings that cite authentication as a barrier without accounting for the registered user base size and viability of credential stuffing, phishing, or insider misuse.
+
+**Mitigation sufficiency and residual rating**
+- Would failure of any single mitigation restore the original risk level? If yes, the residual rating overstates control effectiveness.
+- Are the cited controls operationally validated in this environment, or listed on paper only?
+- Challenge any two-level drops (e.g., High → Low) as requiring unusually strong, independently verifiable evidence.
+- Are planned (not yet in-place) mitigations being credited in the residual rating? If so, the residual risk is forward-looking and contingent — flag this explicitly.
+
+---
+
+#### Risk and Compliance Expert
+
+Voice: A Risk and Compliance officer stress-testing whether the paper satisfies the organisation's risk management framework — that the residual risk is formally accepted at the right level, that escalation thresholds are correctly applied, and that the paper gives the approver sufficient basis to own the decision.
+
+Pick the **2 most significant** from these angles:
+
+**Risk governance and escalation**
+- Is the residual risk level consistent with the organisation's risk appetite and policy thresholds? High residual risk carried beyond 1 month typically requires escalation or compensating approval beyond GRC.
+- Has the correct approving authority been identified? A residual risk on a system processing regulated data for a large user base may require DPO or CISO sign-off before GRC can act.
+- Does the extension duration align with documented constraints, or is the total duration self-asserted by the requesting team? A change freeze alone does not justify the full extension period if remediation work could begin in parallel.
+- If this is a repeat extension, challenge why the prior extension did not result in remediation and what is materially different this time.
+
+**Residual risk defensibility**
+- Could the approver reconstruct the rationale for the residual rating from this paper alone, without asking the author follow-up questions? If not, the paper is not decision-ready.
+- Is the review trigger clause specific and enforceable (named events, named owner, named action), or a generic catch-all that provides no real governance value?
+- Are applicable regulatory or contractual obligations explicitly addressed where residual impact is Major or Severe — or left for the approver to infer?
