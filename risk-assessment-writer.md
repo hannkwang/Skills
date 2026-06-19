@@ -6,7 +6,7 @@ originator: Hannkwang
 
 # Risk Assessment Writer
 
-Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]` and list all TBCs at the end.
+Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]`.
 
 ## Core principles
 
@@ -17,27 +17,17 @@ Generate a decision-ready risk assessment paper (timeline extension or formal ri
 
 ## Inputs
 
-Use whatever the user provides. Do not ask for missing information upfront — proceed immediately and mark any gaps `[TBC]` inline, then list all TBCs at the end of the draft. Useful fields:
+Use whatever the user provides. Do not ask for missing information upfront — proceed immediately and mark any gaps `[TBC]` inline. Useful fields:
 
 | Input | Why needed |
 |---|---|
 | System name, function, classification/criticality, exposure (internet-facing / intranet / air-gapped), user base | Drives Impact anchoring |
 | Vulnerability: CVE + CVSS (or weakness class if no CVE) | Column 2 |
-| Discovery source (VAPT / VMS / bug bounty / vendor advisory / threat intel) and date reported | Background 2.3 |
+| Discovery source (VAPT / VMS / bug bounty / vendor advisory / threat intel) and date reported | Background |
 | **Original remediation deadline** (user-supplied) | Baseline for the ask |
 | **Requested new deadline** (user-supplied) | Defines extension duration |
 | Mitigations in place or planned (with dates) | Column 7 |
-| Committed remediation plan and owner | Justification 3.1 |
-
-**Extension sanity check**: compute the extension duration (new deadline minus original deadline) and state it explicitly in the Aim. Apply these flags in the draft so the approver sees them without asking:
-
-| Condition | Action |
-|---|---|
-| Residual risk High and extension > 1 month | Add a highlighted note: extended carriage of High residual risk; recommend interim re-review at the 1-month mark |
-| Any second or subsequent extension for the same finding | State the extension history (count + cumulative duration) in the Aim |
-| Extension > 6 months | Recommend converting to formal risk acceptance with scheduled re-assessment instead of a timeline extension |
-
-When this is the **first extension**, do not state that fact in the Aim — it is the default case and adds noise. Only surface extension history when a prior extension exists.
+| Committed remediation plan and owner | Justification |
 
 ## Document structure
 
@@ -79,7 +69,7 @@ Succinct, up to 3 lines, stating: why the team cannot remediate within the origi
 | Architectural work | Fix requires redesign (e.g., auth rework), not a patch |
 | Resource/sequencing | Same team remediating a higher-severity finding first |
 
-Example: "Patch removes the `ProgramExport` endpoint that 23 custom payroll scripts depend on, requiring a 12-week rewrite onto the service framework (impact assessment REF-2026-HR-112); committed by 20 Sep 2026, owner HR Systems Team Lead; re-assess immediately on public PoC release, observed exploitation, or any change to LAN/VPN-only exposure."
+Example: "The vendor patch is due in Q3 2026, so remediation is committed by 30 Sep 2026 under the Platform Engineering Lead, and will be re-assessed immediately if a public PoC appears, exploitation is observed, or exposure changes."
 
 ### 4. Impact, Risk Assessment and Mitigation
 
@@ -143,17 +133,19 @@ If the user's organisation supplies a different matrix or anchors, use theirs an
 
 ## Output
 
-Default to a Markdown document with the table. If the user asks for a Word document or formal submission, follow the docx skill and render the table properly there.
+Default to a Word document for formal submission, follow the docx skill and render the table properly there.
 
 ## Expert critique
 
-At the end of the paper, always append a `### Critique` block with two expert sub-sections. Each expert raises exactly **2 challenges** — the most significant for this specific paper. Each bullet leads with a **bold label**, then 1–2 sentences of challenge. Do not soften findings. Omit angles that are clearly inapplicable to this paper.
+The Critique is an **internal pre-submission stress-test for the author**, not part of the paper GRC signs against. Always produce it, but keep it separate from the submission body — place it after a page break (or deliver it as a separate section the author can strip before sending). It exists to let the author find and fix weaknesses before GRC does, not to hand the approver pre-written objections.
+
+Append a `### Critique` block with two expert sub-sections. Each expert raises exactly **2 challenges** — the most significant for this specific paper. Each bullet leads with a **bold label**, then 1–2 sentences of challenge. Do not soften findings. Omit angles that are clearly inapplicable to this paper.
 
 ---
 
 #### Cybersecurity Expert
 
-Voice: A senior penetration tester or threat analyst stress-testing the technical substance of the paper. Goal: surface where the risk or vulnerability has been under-scoped, or where the mitigations do not credibly justify the residual rating.
+Voice: A threat analyst stress-testing the technical substance of the paper. Goal: surface where the risk or vulnerability has been under-scoped, or where the mitigations do not credibly justify the residual rating.
 
 Pick the **2 most significant** from these angles:
 
@@ -177,7 +169,7 @@ Voice: A Risk and Compliance officer stress-testing whether the paper satisfies 
 Pick the **2 most significant** from these angles:
 
 **Risk governance and escalation**
-- Is the residual risk level consistent with the organisation's risk appetite and policy thresholds? High residual risk carried beyond 1 month typically requires escalation or compensating approval beyond GRC.
+- Is the residual risk level consistent with the organisation's risk appetite and policy thresholds — i.e. is this risk one the organisation should accept at all, not merely who signs for it?
 - Has the correct approving authority been identified? A residual risk on a system processing regulated data for a large user base may require DPO or CISO sign-off before GRC can act.
 - Does the extension duration align with documented constraints, or is the total duration self-asserted by the requesting team? A change freeze alone does not justify the full extension period if remediation work could begin in parallel.
 - If this is a repeat extension, challenge why the prior extension did not result in remediation and what is materially different this time.
@@ -185,4 +177,3 @@ Pick the **2 most significant** from these angles:
 **Residual risk defensibility**
 - Could the approver reconstruct the rationale for the residual rating from this paper alone, without asking the author follow-up questions? If not, the paper is not decision-ready.
 - Is the review trigger clause specific and enforceable (named events, named owner, named action), or a generic catch-all that provides no real governance value?
-- Are applicable regulatory or contractual obligations explicitly addressed where residual impact is Major or Severe — or left for the approver to infer?
