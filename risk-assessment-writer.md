@@ -8,12 +8,6 @@ originator: Hannkwang
 
 Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]` and list all TBCs at the end.
 
-## Dependencies
-
-Before proceeding, also load:
-- `mitigations-catalog.md` — approved controls catalog for column 7; load when filling Mitigation Measures, not before
-- `risk-assessment-example.md` — one complete worked paper showing the full output shape (Aim → Background → Justification → populated 10-column row → matrix verification → dual-expert critique); load on first draft if unsure of the structure
-
 ## Core principles
 
 1. **BLUF.** The Aim states the decision requested in one or two sentences. No throat-clearing.
@@ -99,12 +93,12 @@ Present as a table with EXACTLY these 10 columns:
 | 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
 | 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
 | 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., applicable regulatory reporting, contractual breach penalties) |
-| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Select from `mitigations-catalog.md` by control ID (load that file when filling this column, not before). Any likelihood/impact drop in cols 8-9 must use a control the catalog's "Reduces" column lists for that axis **AND** whose "Applicable to" class covers this vulnerability - a control that reduces the right axis but does not apply to this weakness class is invalid. Do not invent products or controls not in the catalog; if no entry fits, write the mitigation and mark it [NON-STANDARD] for reviewer attention |
-| 8 | Residual Likelihood | Post-mitigation 5-level rating + which control ID(s) caused the change |
-| 9 | Residual Impact | Post-mitigation 5-level rating + which control ID(s) caused the change |
+| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Each mitigation names the control, who operates it, and what it blocks or detects. Any likelihood/impact drop in cols 8-9 must be traceable to a specific mitigation listed here that credibly acts on that axis |
+| 8 | Residual Likelihood | Post-mitigation 5-level rating + which mitigation(s) caused the change |
+| 9 | Residual Impact | Post-mitigation 5-level rating + which mitigation(s) caused the change |
 | 10 | Residual Risk | High/Medium/Low derived from the same 5x5 matrix |
 
-**Multi-vulnerability papers**: give each vulnerability its own row. Where mitigations are shared across rows, list the full mitigation once (first row where it applies) and reference it by control ID in subsequent rows (e.g., "NW-01 as per row 1"). Never restate full mitigation text across rows.
+**Multi-vulnerability papers**: give each vulnerability its own row. Where mitigations are shared across rows, list the full mitigation once (first row where it applies) and reference it by name/number in subsequent rows. Never restate full mitigation text across rows.
 
 ## Risk matrix (5x5 likelihood x impact -> High/Medium/Low risk)
 
@@ -138,17 +132,14 @@ Present as a table with EXACTLY these 10 columns:
 | **Unlikely** | Low | Low | Medium | Medium | Medium |
 | **Rare** | Low | Low | Low | Medium | Medium |
 
-Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from this matrix. After drafting, explicitly verify each row: look up the (Likelihood, Impact) cell and confirm it matches the stated risk level. Do the same for the residual pair.
-
-Also confirm residual risk is **not higher** than original. If the residual risk **band** equals the original band (the mitigations did not move the rated risk), state this explicitly in the Impact Assessment column and the §4 verification line — do not present unchanged risk as if it had been mitigated. Keep this disclosure **out of the Aim**: the Aim stays BLUF (the decision requested only). Note that a band can hold even when one axis moves (e.g., Possible→Unlikely with Impact unchanged may stay Medium); the disclosure is about the band, not the axes.
+Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from this matrix. Residual risk must not be higher than original. If the residual risk band equals the original band despite axis movement, state this explicitly in the Impact Assessment column — do not present unchanged risk as if it had been mitigated. Keep this disclosure out of the Aim.
 
 If the user's organisation supplies a different matrix or anchors, use theirs and note the substitution.
 
 ## Workflow
 
-1. **Read** `mitigations-catalog.md` when filling column 7.
-2. **Draft** using the four-section structure and 10-column table. Apply the extension sanity-check flags.
-3. **Flag gaps** rather than inventing facts: mark `[TBC]` inline and list all TBCs at the end.
+1. **Draft** using the four-section structure and 10-column table. Apply the extension sanity-check flags.
+2. **Flag gaps** rather than inventing facts: mark `[TBC]` inline and list all TBCs at the end.
 
 ## Output
 
