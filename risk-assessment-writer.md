@@ -1,12 +1,12 @@
 ---
 name: risk-assessment-writer
-description: Generate a risk assessment paper, risk acceptance request, or remediation timeline extension request from a freeform description of a security vulnerability. Use this skill whenever the user describes a vulnerability and wants it turned into a decision-ready risk paper - including requests to "generate a risk assessment", "write up", "draft a paper for", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding. Do not use for general CVE analysis or triage that does not involve producing a risk paper.
+description: Generate a risk assessment paper, risk acceptance request, or remediation timeline extension request from a freeform description. Use this skill whenever the user describes a risk and wants it turned into a decision-ready risk paper - including requests to "generate a risk assessment", "write up", "draft a paper for", or "justify an extension" for a CVE, VAPT finding, VMS finding, or bug bounty finding.
 originator: Hannkwang
 ---
 
 # Risk Assessment Writer
 
-Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is GRC, who needs to decide in minutes, not reverse-engineer the engineer's thinking. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]`.
+Generate a decision-ready risk assessment paper (timeline extension or formal risk acceptance) from whatever freeform description the user provides. The reader is the GRC committee. Draft a complete paper from whatever inputs the user gives; mark any missing fields `[TBC]`.
 
 ## Core principles
 
@@ -42,24 +42,28 @@ ALWAYS use this exact four-section structure:
 
 ## Section guidance
 
-Keep the narrative sections tight: the **Aim is exactly one line** (BLUF). **Background and Justification are at most 3 lines each** — succinct, no padding; one line is fine if it covers the facts. (The §4 table carries the detail.) For a multi-vulnerability paper the 3-line limit applies *per vulnerability*.
+Keep the narrative sections tight: the **Aim is exactly one line** (BLUF). **Background and Justification are at most 2 lines each** — succinct, no padding; one line is fine if it covers the facts. (The §4 table carries the detail.) For a multi-vulnerability paper the 2-line limit applies *per vulnerability*.
+
+**Write in complete sentences.** Every statement the reader sees — the narrative sections and the descriptive table cells (cols 2, 6, and 7) — must be a full grammatical sentence. Do not splice independent clauses with semicolons, and do not write in telegraphic note-form: no sentence fragments, no trailing "— basis for X" tags, no "(Category: …)" labels. Keep sentences short, but keep them whole. (The rating columns 3-5 and 8-10 are the exception: they carry a single band word only.)
 
 ### 1. Aim
 
-One line stating: the approval sought (timeline extension / formal risk acceptance), the residual risk level to be carried (High / Medium / Low), and — if a timeline extension — original deadline → requested deadline and the resulting extension duration. BLUF only; no caveats.
+One line stating: the approval sought (timeline extension / formal risk acceptance), the residual risk level to be carried (Low / Medium / Medium-High / High / Very High), and — if a timeline extension — original deadline → requested deadline and the resulting extension duration. BLUF only; no caveats.
 
-Example: "To seek GRC approval for formal risk acceptance of one Medium residual risk vulnerability on System X."
-Example: "To seek approval from GRC for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
+Example: "To seek GRC approval for risk acceptance of one Medium residual risk vulnerability on System X."
+Example: "To seek GRC approval for a 3-month extension of the remediation timeline (from 30 Jun 2026 to 30 Sep 2026) for one Medium residual risk vulnerability on System X."
+
+For a multi-vulnerability paper, state the **count and the highest residual band carried** (with the distribution): e.g. "To seek GRC approval for risk acceptance of 3 vulnerabilities (1 High, 2 Medium residual) on System X."
 
 ### 2. Background
 
-Succinct, up to 3 lines, covering: the **system** (name, function, classification, exposure, users), the **vulnerability** (CVE+CVSS or weakness class, plus what it enables on THIS system), and **how/when found** (source, date reported, original deadline).
+Succinct, up to 2 lines, covering: the **system** (name, function, classification, exposure, users), the **vulnerability** (CVE+CVSS or weakness class, plus what it enables on THIS system), and **how/when found** (source, date reported, original deadline).
 
-Example: "HRConnect — CONFIDENTIAL intranet-facing HR/payroll portal for ~2,500 staff — runs Apache OFBiz 18.12.x affected by CVE-2024-38856 (CVSS 9.8), an unauthenticated auth bypass allowing RCE as the service account; found via VMS scan on 20 May 2026, original deadline 20 Jun 2026."
+Example: "HRConnect is a CONFIDENTIAL, intranet-facing HR and payroll portal serving about 2,500 staff. It runs Apache OFBiz 18.12.x, which is affected by CVE-2024-38856 (CVSS 9.8), an unauthenticated authentication bypass that allows remote code execution as the service account. The vulnerability was found by a VMS scan on 20 May 2026, against an original remediation deadline of 20 Jun 2026."
 
 ### 3. Justification
 
-Succinct, up to 3 lines, stating: why the team cannot remediate within the original timeline (pick a category below, cite the evidence), the committed remediation date and owner, **and** the review trigger (conditions forcing immediate re-assessment regardless of the approved deadline — public PoC/exploit release, observed exploitation, change in exposure). "Team is busy" without sequencing context is not a justification.
+Succinct, up to 2 lines, stating: why the team cannot remediate within the original timeline, the committed remediation date and owner, or why a risk acceptance is required. Pick a category below and cite the evidence; "team is busy" without sequencing context is not a justification.
 
 | Category | Example |
 |---|---|
@@ -69,7 +73,7 @@ Succinct, up to 3 lines, stating: why the team cannot remediate within the origi
 | Architectural work | Fix requires redesign (e.g., auth rework), not a patch |
 | Resource/sequencing | Same team remediating a higher-severity finding first |
 
-Example: "The vendor patch is due in Q3 2026, so remediation is committed by 30 Sep 2026 under the Platform Engineering Lead, and will be re-assessed immediately if a public PoC appears, exploitation is observed, or exposure changes."
+Example: "The vendor patch is due in Aug 2026, so remediation is committed by 30 Sep 2026 under Technical Services."
 
 ### 4. Impact, Risk Assessment and Mitigation
 
@@ -78,66 +82,84 @@ Present as a table with EXACTLY these 10 columns:
 | # | Column | What goes in it |
 |---|---|---|
 | 1 | No | Row number |
-| 2 | Vulnerability Assessment | Short description + CVE; what exploitation looks like on THIS system |
-| 3 | Likelihood | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
-| 4 | Impact | Pre-mitigation 5-level rating, with one-line reason anchored to the definitions below |
-| 5 | Original Risk | High/Medium/Low derived from the 5x5 matrix |
-| 6 | Impact Assessment | Concrete worst-case consequence if exploited (what data, what service, what obligations - e.g., applicable regulatory reporting, contractual breach penalties) |
-| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Each mitigation names the control, who operates it, and what it blocks or detects. Any likelihood/impact drop in cols 8-9 must be traceable to a specific mitigation listed here that credibly acts on that axis |
-| 8 | Residual Likelihood | Post-mitigation 5-level rating + which mitigation(s) caused the change |
-| 9 | Residual Impact | Post-mitigation 5-level rating + which mitigation(s) caused the change |
-| 10 | Residual Risk | High/Medium/Low derived from the same 5x5 matrix |
+| 2 | Vulnerability Assessment | A flowing, complete-sentence assessment that weaves four components together **without labelling them**: the *weakness/vulnerability* (the flaw and where it sits on THIS system, with CVE and CVSS if available, otherwise the weakness class), the *threat* (the realistic threat actor and attack path given the system's exposure and configuration), the *consequence* (what the attacker achieves technically on success), and the *impact* (the resulting harm across the data, operational, and public/reputational dimensions). Follow this shape: "In the event that &lt;weakness&gt; is exploited by an attacker via &lt;threat&gt;, &lt;consequence&gt; may occur, which would result in &lt;impact to system/users&gt;." Where the impact spans several dimensions, extend into a second sentence. This column also carries the rationale for the Likelihood band. Cols 3-5 and 8-10 hold bands only |
+| 3 | Likelihood | Pre-mitigation band only — one of Highly Likely / Likely / Possible / Unlikely / Rare (per the anchors below). No reasoning here; it lives in col 2 |
+| 4 | Impact | Pre-mitigation band only — one of Very Severe / Severe / Moderate / Minor / Negligible (per the anchors below). No reasoning here; it lives in col 6 |
+| 5 | Original Risk | Band only — one of Low / Medium / Medium-High / High / Very High, derived from the 5x5 matrix |
+| 6 | Impact Assessment | The concrete worst case that anchors the Impact band, stated in specifics rather than the qualitative dimensions of col 2: the volume and sensitivity of data at stake, the criticality of the service affected, and the formal obligations triggered (for example regulatory breach-notification timelines, card-scheme fines, or contractual penalties) |
+| 7 | Mitigation Measures | Numbered, specific, in-place-vs-planned marked with dates. Each mitigation names the control (Preventive/Detective/Responsive), who operates it, and what it blocks or detects. Any likelihood/impact drop in cols 8-9 must be traceable to a specific mitigation listed here that credibly acts on that axis |
+| 8 | Residual Likelihood | Post-mitigation band only (same scale as col 3); the mitigation(s) driving the change are named in col 7, not here |
+| 9 | Residual Impact | Post-mitigation band only (same scale as col 4); the mitigation(s) driving the change are named in col 7, not here |
+| 10 | Residual Risk | Band only — one of Low / Medium / Medium-High / High / Very High, derived from the same 5x5 matrix |
 
 **Multi-vulnerability papers**: give each vulnerability its own row. Where mitigations are shared across rows, list the full mitigation once (first row where it applies) and reference it by name/number in subsequent rows. Never restate full mitigation text across rows.
 
-## Risk matrix (5x5 likelihood x impact -> High/Medium/Low risk)
+## Risk matrix (5x5 likelihood x impact -> 5-band risk: Low / Medium / Medium-High / High / Very High)
 
-### Likelihood anchors (pre- or post-mitigation, same scale)
+The same anchors below apply to both the pre-mitigation ratings (cols 3-4) and the residual ratings (cols 8-9) — one scale, used twice.
+
+### Likelihood anchors (informed by discoverability, exploitability, and exposure)
 
 | Level | Anchor |
 |---|---|
-| Almost Certain | Exploitation expected: internet-facing, no auth required, weaponised exploit in active use in the wild |
+| Highly Likely | Exploitation expected: internet-facing, no auth required, weaponised exploit in active use in the wild |
 | Likely | Public exploit/PoC available AND system reachable by the relevant threat actor; low attacker prerequisites |
 | Possible | Exploit technique documented but requires meaningful prerequisites (auth, specific config, chaining) OR exposure is limited (intranet only) |
 | Unlikely | No public exploit; high prerequisites (local access, privileged account); or strong compensating control directly blocks the vector |
 | Rare | Exploitation requires insider access or physical access, or the vulnerable code path is unreachable in deployed configuration |
 
-### Impact anchors
+### Impact anchors on Confidentiality x Integrity x Availability
 
 | Level | Anchor |
 |---|---|
-| Severe | Bulk loss/exposure of sensitive or RESTRICTED-classified data; sustained outage of a critical service; statutory breach-notification obligations near-certain |
-| Major | Significant personal data exposure or material service degradation affecting external users; likely regulatory reporting |
+| Very Severe | Bulk loss/exposure of sensitive or RESTRICTED-classified data; sustained outage of a critical service; statutory breach-notification obligations near-certain |
+| Severe | Significant personal data exposure or material service degradation affecting external users; likely regulatory reporting |
 | Moderate | Limited data exposure (small scope or low sensitivity) or internal service disruption; contained blast radius |
-| Minor | Negligible data sensitivity; brief degradation; no external user impact |
-| Insignificant | No meaningful confidentiality/integrity/availability consequence in deployed context |
+| Minor | Very low data sensitivity; brief degradation; no external user impact |
+| Negligible | No meaningful confidentiality/integrity/availability consequence in deployed context |
 
 ### Risk derivation matrix
 
-| Likelihood \ Impact | Insignificant | Minor | Moderate | Major | Severe |
+| Likelihood \ Impact | Negligible | Minor | Moderate | Severe | Very Severe |
 |---|---|---|---|---|---|
-| **Almost Certain** | Medium | Medium | High | High | High |
-| **Likely** | Low | Medium | Medium | High | High |
-| **Possible** | Low | Medium | Medium | Medium | High |
-| **Unlikely** | Low | Low | Medium | Medium | Medium |
+| **Highly Likely** | Medium | Medium | High | Very High | Very High |
+| **Likely** | Low | Medium | Medium-High | High | Very High |
+| **Possible** | Low | Medium | Medium | Medium-High | High |
+| **Unlikely** | Low | Low | Medium | Medium | Medium-High |
 | **Rare** | Low | Low | Low | Medium | Medium |
 
 Both Original Risk (column 5) and Residual Risk (column 10) MUST be derived from this matrix. Residual risk must not be higher than original. If the residual risk band equals the original band despite axis movement, state this explicitly in the Impact Assessment column — do not present unchanged risk as if it had been mitigated. Keep this disclosure out of the Aim.
 
-If the user's organisation supplies a different matrix or anchors, use theirs and note the substitution.
+A **High or Very High residual** risk should not be presented as routinely acceptable — it tests the organisation's risk appetite, not merely who signs, and typically requires elevated approval (e.g. CISO) before GRC can act.
 
 ## Workflow
 
-1. **Draft** using the four-section structure and 10-column table. Apply the extension sanity-check flags.
-2. **Flag gaps** rather than inventing facts: mark `[TBC]` inline and list all TBCs at the end.
+1. **Gather** the inputs the user gave; do not ask for more upfront.
+2. **Draft** the four-section paper and the 10-column §4 table.
+3. **Derive** Original Risk (col 5) and Residual Risk (col 10) from the matrix.
+4. **Self-check before output:**
+   - Every residual drop traces to a named mitigation in col 7 that credibly acts on that axis.
+   - Residual band ≤ Original band; if equal despite axis movement, state so in col 6.
+   - Planned (not-yet-in-place) mitigations are flagged as contingent.
+   - Any two-level drop carries explicit justification.
+5. **Write** the post-break Residual Risk Statement, then the Critique.
+6. **Flag gaps** rather than inventing facts: mark `[TBC]` inline and list all TBCs at the end.
 
 ## Output
 
-Default to a Word document for formal submission, follow the docx skill and render the table properly there.
+Default to a Word document for formal submission: if a docx/Word-generation skill is available, use it and render the §4 table properly there; otherwise deliver a well-formed Markdown document with the §4 table intact.
+
+## Residual Risk Statement
+
+Append a **one-line residual risk statement**. It is **neutral and not part of the paper** GRC signs against — its only job is to translate the residual rating (col 10) into plain descriptive language so the reader understands what the outstanding residual risk actually *is*. Describe, do not argue: neither downplay nor amplify the risk, and make no recommendation.
+
+Derive it from §4 — introduce no new facts. State the **residual band** and then describe, in plain terms, what remains: what could still happen, to what (data / service / system), and how exposed it is after the mitigations. For a multi-vulnerability paper, describe the highest residual band carried and note the count at that band.
+
+Example: "Residual risk is Medium: after WAF virtual-patching and restricted network access, the unauthenticated RCE on HRConnect (CVE-2024-38856) remains exploitable only by an actor already on the internal network, who could on success read or alter payroll records for ~2,500 staff."
 
 ## Expert critique
 
-The Critique is an **internal pre-submission stress-test for the author**, not part of the paper GRC signs against. Always produce it, but keep it separate from the submission body — place it after a page break (or deliver it as a separate section the author can strip before sending). It exists to let the author find and fix weaknesses before GRC does, not to hand the approver pre-written objections.
+The Critique is an **internal pre-submission stress-test for the author**, not part of the paper GRC signs against. Always produce it, but keep it separate from the submission body — place it after a page break (a `---` separator in a Markdown deliverable). It exists to let the author find and fix weaknesses before GRC does, not to hand the approver pre-written objections.
 
 Append a `### Critique` block with two expert sub-sections. Each expert raises exactly **2 challenges** — the most significant for this specific paper. Each bullet leads with a **bold label**, then 1–2 sentences of challenge. Do not soften findings. Omit angles that are clearly inapplicable to this paper.
 
@@ -170,10 +192,9 @@ Pick the **2 most significant** from these angles:
 
 **Risk governance and escalation**
 - Is the residual risk level consistent with the organisation's risk appetite and policy thresholds — i.e. is this risk one the organisation should accept at all, not merely who signs for it?
-- Has the correct approving authority been identified? A residual risk on a system processing regulated data for a large user base may require DPO or CISO sign-off before GRC can act.
+- Has the correct approving authority been identified? A residual risk on a system processing regulated data for a large user base may require CISO sign-off before GRC can act.
 - Does the extension duration align with documented constraints, or is the total duration self-asserted by the requesting team? A change freeze alone does not justify the full extension period if remediation work could begin in parallel.
 - If this is a repeat extension, challenge why the prior extension did not result in remediation and what is materially different this time.
 
 **Residual risk defensibility**
 - Could the approver reconstruct the rationale for the residual rating from this paper alone, without asking the author follow-up questions? If not, the paper is not decision-ready.
-- Is the review trigger clause specific and enforceable (named events, named owner, named action), or a generic catch-all that provides no real governance value?
